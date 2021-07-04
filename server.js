@@ -5,9 +5,8 @@ const express = require('express');
 const app = express();
 const routes = require('./routes/routes');
 
-app.use('/api', routes);
 app.use(express.json());
-
+app.use('/api', routes);
 
 const mongoose = require('mongoose');
 // REQUEST CONNECTION TO DATABASE
