@@ -14,11 +14,11 @@ const assetSchema = mongoose.Schema({
         required: true
     },
     price: {
-        type: Decimal128,
+        type: Number,
         required: true
     },
     minimumBid: {
-        type: Decimal128,
+        type: Number,
         required: true
     },
     openingDate: {
@@ -33,4 +33,4 @@ const assetSchema = mongoose.Schema({
 });
 
 
-module.exports = mongoose.model('assetschema', assetSchema);
+module.exports = mongoose.model('asset', assetSchema);
