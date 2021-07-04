@@ -1,9 +1,11 @@
-require('dotenv'); // PROTECT VITAL INFO
+require('dotenv').config(); // PROTECT VITAL INFO
 
 const PORT = process.env.PORT || 3000;
 const express = require('express');
 const app = express();
+const routes = require('./routes/routes');
 
+app.use('/api', routes);
 app.use(express.json());
 
 
@@ -19,11 +21,12 @@ mongoose.connect(
 // CHECK CONNECTION TO DATABASE
 const db = mongoose.connection;
 db.on('error', (error)=>{console.log(error)});
-db.once('connnect', ()=>{console.log('Connected to Database')});
+db.once('open', ()=>{console.log('Connected to Database')});
 
 
-app.get('/', (req,res)=>{
-    res.send('API BasePoint')
+// API BASE POINT
+app.get('/', async (req,res)=>{
+    res.send('API BasePoint\n\n');
 })
 
 
