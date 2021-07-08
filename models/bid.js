@@ -8,6 +8,10 @@ const bidSchema = mongoose.Schema({
         type: Array,
         required: false
     },
+    prices: {
+        type: Array,
+        required: false
+    }
 });
 
 module.exports = mongoose.model('bid', bidSchema);
