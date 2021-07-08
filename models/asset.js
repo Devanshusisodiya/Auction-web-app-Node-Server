@@ -26,6 +26,11 @@ const assetSchema = mongoose.Schema({
     closingDate: {
         type: auctionDateSchema,
         required: true
+    },
+    status: {
+        type: Boolean,
+        required: false,
+        default: false
     }
 
 });
