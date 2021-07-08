@@ -136,13 +136,18 @@ router.patch('/patch', async (req, res)=>{
     const query = {assetName: req.body.assetName};
     const updateDoc = {
         $push: {
-            "bidders": req.body.bidder
+            "bidders": req.body.bidder,
+            "prices": req.body.price,
         }
     };
-    const result = await Bid.findOneAndUpdate(query, updateDoc, {
-        useFindAndModify: false,
-    });
-    res.status(221).json({message: 'bidder added', doc: result});
+    try{
+        const result = await Bid.findOneAndUpdate(query, updateDoc, {
+            useFindAndModify: false,
+        });
+        res.status(221).json({message: 'bidder added', doc: result});
+    }catch (error){
+        res.status(421).json({message: error.message});
+    }
 });
 
 
