@@ -1,12 +1,20 @@
 require('dotenv').config(); // PROTECT VITAL INFO
 
-const PORT = process.env.PORT || 3000;
 const express = require('express');
 const app = express();
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+    next()
+  });
+
+const PORT = process.env.PORT;
 const routes = require('./routes/routes');
 
 app.use(express.json());
 app.use('/api', routes);
+
 
 const mongoose = require('mongoose');
 // REQUEST CONNECTION TO DATABASE
@@ -24,7 +32,7 @@ db.once('open', ()=>{console.log('Connected to Database')});
 
 
 // API BASE POINT
-app.get('/', async (req,res)=>{
+app.get('/', (req,res)=>{
     res.send('API BasePoint\n\n');
 })
 
