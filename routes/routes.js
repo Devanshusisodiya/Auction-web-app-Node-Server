@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const User = require('../models/user');
 const Asset = require('../models/asset');
-
+const Bid = require('../models/bid');
 
 // USER RELATED REQUESTS
 
@@ -104,7 +104,38 @@ router.post('/reg/asset', async (req,res)=>{
     }
 });
 
+// BIDDING ROUTES 
+
+router.get('/get-bids', async (req, res)=>{
+    const bids = await Bid.find();
+    res.json(bids);
+    console.log(bids);
+});
+
+router.post('/create-bid', async (req, res)=>{
+    const bid = new Bid({
+        assetName: req.body.assetName,
+        bidders: [],
+    })
+    try{
+        const newBid = await bid.save();
+        res.status(220).json({message: 'bid generated'});
+    }catch (error){
+        res.json({message: error.message});
+    }
+});
+
+router.patch('/patch', async (req, res)=>{
+    const query = {assetName: req.body.assetName};
+    const updateDoc = {
+        $push: {
+            "bidders": req.body.bidder
+        }
+    };
+    const result = await Bid.findOneAndUpdate(query, updateDoc, {
+        useFindAndModify: false,
+    });
+    res.status(221).json({message: 'bidder added', doc: result});
+});
+
 module.exports = router;
-
-
-// CREATE MORE ROUTES
