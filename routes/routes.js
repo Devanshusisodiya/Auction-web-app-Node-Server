@@ -17,7 +17,7 @@ router.post('/login', async (req, res)=>{
     var username = req.body.username;
     var password = req.body.password;
 
-    let state = 0;
+    let state = false;
 
     if(username.length != 0 && password.length != 0){
         // BOTH USERNAME AND PASSWORD ARE PRESENT
@@ -30,14 +30,14 @@ router.post('/login', async (req, res)=>{
                 currentUser = user;
                 // IF PASSWORD IS CORRECT
                 if(password === currentUser.password){
-                    state = 1;
+                    state = true;
                 }
             }
         });
     }
 
-    // IF BOTH USERNAME AND PASSWORD ENTERED WERE CORRECT STATE ---> 1 
-    if(state === 1){
+    // IF BOTH USERNAME AND PASSWORD ENTERED WERE CORRECT STATE ---> true
+    if(state){
         res.status(203).json({message: `${username} logged in`});
     }else{
         res.status(410).json({message: 'invalid credentials'});
@@ -88,19 +88,33 @@ router.get('/get-assets', async (req, res)=>{
 
 // WRITE FILTER FOR DISTINCT ASSET NAMES GETTING REGISTERED
 router.post('/reg/asset', async (req,res)=>{
-    const asset = new Asset({
-        name: req.body.name,
-        price: req.body.price,
-        minimumBid: req.body.minimumBid, 
-        openingDate: req.body.openingDate,
-        closingDate: req.body.closingDate
-    });
 
-    try{
-        const newAsset = await asset.save();
-        res.status(201).json({message: 'new asset added', asset: newAsset});
-    }catch(error){
-        res.status(400).json({message: 'bad request'});
+    const assetName = req.body.name;
+    const assets = await Asset.find();
+    let state = 0;
+
+    for(var index in assets){
+        if(assetName === assets[index].name){
+            res.status(420).json({message: 'asset already exists'});
+            state = 1;
+            break;
+        }
+    }
+    if(state === 0){
+        const asset = new Asset({
+            name: req.body.name,
+            price: req.body.price,
+            minimumBid: req.body.minimumBid, 
+            openingDate: req.body.openingDate,
+            closingDate: req.body.closingDate
+        });
+    
+        try{
+            const newAsset = await asset.save();
+            res.status(201).json({message: 'new asset added', asset: newAsset});
+        }catch(error){
+            res.status(400).json({message: 'bad request'});
+        }
     }
 });
 
@@ -137,5 +151,8 @@ router.patch('/patch', async (req, res)=>{
     });
     res.status(221).json({message: 'bidder added', doc: result});
 });
+
+
+
 
 module.exports = router;
