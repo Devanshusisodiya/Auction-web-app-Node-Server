@@ -108,10 +108,16 @@ router.post('/reg/asset', async (req,res)=>{
             openingDate: req.body.openingDate,
             closingDate: req.body.closingDate
         });
+
+        const bid = new Bid({
+            assetName: req.body.name,
+            bidders: [],
+        })
     
         try{
+            const newBid = await bid.save();
             const newAsset = await asset.save();
-            res.status(201).json({message: 'new asset added', asset: newAsset});
+            res.status(201).json({message: 'new asset added and bid initialized', asset: newAsset, bid: newBid});
         }catch(error){
             res.status(400).json({message: 'bad request'});
         }
@@ -124,19 +130,6 @@ router.get('/get-bids', async (req, res)=>{
     const bids = await Bid.find();
     res.json(bids);
     console.log(bids);
-});
-
-router.post('/create-bid', async (req, res)=>{
-    const bid = new Bid({
-        assetName: req.body.assetName,
-        bidders: [],
-    })
-    try{
-        const newBid = await bid.save();
-        res.status(220).json({message: 'bid generated'});
-    }catch (error){
-        res.json({message: error.message});
-    }
 });
 
 router.patch('/patch', async (req, res)=>{
