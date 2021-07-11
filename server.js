@@ -21,7 +21,7 @@ var options = {
 const mongoose = require('mongoose');
 // REQUEST CONNECTION TO DATABASE
 mongoose.connect(
-    process.env.DATABASE_URI,
+    process.env.DATABASE_URI.toString(),
     {
         useNewUrlParser: true,
         useUnifiedTopology: true
