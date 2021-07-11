@@ -6,9 +6,12 @@ const Bid = require('../models/bid');
 // USER RELATED REQUESTS
 
 router.get('/get-users', async (req,res)=>{
-    const userData =  await User.find();
-    res.json(userData);
-    console.log(userData);
+    try{
+        const userData =  await User.find();
+        res.json(userData);
+    }catch(error){
+        res.status(500).json({message: error.message});
+    }
 });
 
 //LOGIN
