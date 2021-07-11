@@ -16,5 +16,9 @@
     "express": "^4.17.1",
     "mongoose": "^5.13.0",
     "nodemon": "^2.0.9"
+  },
+  "engines": {
+    "node": "14.17.0"
   }
+
 }
