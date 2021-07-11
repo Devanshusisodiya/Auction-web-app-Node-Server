@@ -149,6 +149,89 @@ router.get('/get-bids', async (req, res)=>{
     console.log(bids);
 });
 
+router.get('/get-bids/:user', async (req, res)=>{
+    var list =  [];
+    var bids = await Bid.find();
+    var user = req.params.user;
+    for(var index1 in bids){
+        const query = {assetName: bids[index1].assetName, "bidders.name": user};
+        var result = await Bid.find(query);
+        if(result.length !== 0){
+            for(var i = 0; i < result.length; i++){
+                list.push(result[i]);
+            }
+        }
+    }
+    res.status(200).json({result: list});
+});
+
+
+/// MAIN LOGIC
+
+router.get('/results', async (req, res)=>{
+    const bids = await Bid.find();
+    const finalResults = [];
+    for(var i in bids){
+        var price = 0;
+        var winner = " ";
+        var list = [];
+        var result = await Asset.find({name: bids[i].assetName});
+        var closingDate = Date.parse(result[0].closingDate.day + ' ' +result[0].closingDate.time);
+        if(Date.now() > closingDate){
+            for(var j in bids[i].bidders){
+                list.push(bids[i].bidders[j].price);
+            }
+        list.sort();
+        if(list.length > 1){
+            for(var k in bids[i].bidders){
+                if(list[list.length-2] === bids[i].bidders[k].price){
+                    price = bids[i].bidders[k].price
+                }
+                if(list[list.length-1] === bids[i].bidders[k].price){
+                    winner = bids[i].bidders[k].name
+                }
+            }
+            const updatesQuery = {name: bids[i].assetName};
+            const updateDoc = {status: false, winner: winner, price: price};
+
+            try{
+                const result = await Asset.findOneAndUpdate(updatesQuery, updateDoc, {
+                    useFindAndModify: false,
+                    new: true
+                });
+                finalResults.push(result);
+                // res.status(222).json({message: 'status changed', doc: result});
+            }catch (error){
+                // res.status(422).json({message: error.message});
+            }
+        }else{
+            winner = bids[i].bidders[0].name;
+            price = bids[i].bidders[0].price;
+            const updatesQuery = {name: bids[i].assetName};
+            const updateDoc = {status: false, winner: winner, price: price};
+
+            try{
+                const result = await Asset.findOneAndUpdate(updatesQuery, updateDoc, {
+                    useFindAndModify: false,
+                    new: true
+                });
+                finalResults.push(result);
+                // res.status(222).json({message: 'status changed', doc: result});
+            }catch (error){
+                // res.status(422).json({message: error.message});
+            }
+        }
+        }
+        // console.log(winner);
+        // console.log(price);
+
+    }
+
+    res.json(finalResults);
+});
+
+///
+
 router.patch('/patch', async (req, res)=>{
     const query = {assetName: req.body.assetName};
     const bids = await Bid.findOne(query);
