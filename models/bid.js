@@ -7,10 +7,6 @@ const bidSchema = mongoose.Schema({
     bidders: {
         type: Array,
         required: false
-    },
-    prices: {
-        type: Array,
-        required: false
     }
 });
 

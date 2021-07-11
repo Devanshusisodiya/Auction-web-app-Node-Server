@@ -94,6 +94,7 @@ router.post('/reg/asset', async (req,res)=>{
     let state = 0;
 
     for(var index in assets){
+        console.log(assets[index].price);
         if(assetName === assets[index].name){
             res.status(420).json({message: 'asset already exists'});
             state = 1;
@@ -103,6 +104,7 @@ router.post('/reg/asset', async (req,res)=>{
     if(state === 0){
         const asset = new Asset({
             name: req.body.name,
+            winner: req.body.winner,
             price: req.body.price,
             minimumBid: req.body.minimumBid, 
             openingDate: req.body.openingDate,
@@ -111,7 +113,7 @@ router.post('/reg/asset', async (req,res)=>{
 
         const bid = new Bid({
             assetName: req.body.name,
-            bidders: [],
+            // bidders: [],
         })
     
         try{
@@ -121,6 +123,21 @@ router.post('/reg/asset', async (req,res)=>{
         }catch(error){
             res.status(400).json({message: 'bad request'});
         }
+    }
+});
+
+router.patch('/patch-status', async(req, res)=>{
+    const query = {name: req.body.assetName};
+    const updateDoc = {status: req.body.status};
+
+    try{
+        const result = await Asset.findOneAndUpdate(query, updateDoc, {
+            useFindAndModify: false,
+            new: true
+        });
+        res.status(222).json({message: 'status changed', doc: result});
+    }catch (error){
+        res.status(422).json({message: error.message});
     }
 });
 
@@ -134,23 +151,65 @@ router.get('/get-bids', async (req, res)=>{
 
 router.patch('/patch', async (req, res)=>{
     const query = {assetName: req.body.assetName};
-    const updateDoc = {
-        $push: {
-            "bidders": req.body.bidder,
-            "prices": req.body.price,
+    const bids = await Bid.findOne(query);
+
+    let state = 1;
+    const bidderName = req.body.name;
+
+    for(var index in bids.bidders){
+        if(bidderName === bids.bidders[index].name){
+            state = 0;
         }
-    };
-    try{
-        const result = await Bid.findOneAndUpdate(query, updateDoc, {
-            useFindAndModify: false,
-        });
-        res.status(221).json({message: 'bidder added', doc: result});
-    }catch (error){
-        res.status(421).json({message: error.message});
+    }
+    if(state === 0){
+        const query = {assetName: req.body.assetName, "bidders.name": req.body.name};
+        const updateDoc = {
+            $set: {
+                "bidders.$.price": req.body.price
+            }
+        };
+        try{
+            const result = await Bid.findOneAndUpdate(query, updateDoc, {useFindAndModify: false, new: true});
+            res.status(221).json({message: 'bidder added', doc: result});
+        }catch (error){
+            res.status(421).json({message: error.message});
+        }
+
+    }else{
+        const updateDoc = {
+            $push: {
+                "bidders": {'name': req.body.name, 'price': req.body.price}
+            }
+        };
+        try{
+            const result = await Bid.findOneAndUpdate(query, updateDoc, {
+                useFindAndModify: false,
+                new: true
+            });
+            res.status(221).json({message: 'bidder added', doc: result});
+        }catch (error){
+            res.status(421).json({message: error.message});
+        }
     }
 });
 
 
+// FUNCTIONALITIES
+
+router.get('/search/:search_param', async (req, res)=>{
+    const assets = await Asset.find();
+    var namedAssets = [];
+    for(var index in assets){
+        if(assets[index]['name'].includes(req.params.search_param)){
+            namedAssets.push(assets[index]);
+        }
+    }
+    if(namedAssets.length === 0){
+        res.status(224).json({search_results: 'no results found'});
+    }else{
+        res.status(223).json(namedAssets);
+    }
+});
 
 
 module.exports = router;

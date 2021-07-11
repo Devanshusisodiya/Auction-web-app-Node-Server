@@ -11,6 +11,10 @@ const assetSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    winner: {
+        type: String,
+        required: true
+    },
     price: {
         type: Number,
         required: true
