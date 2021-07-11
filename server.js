@@ -20,8 +20,9 @@ var options = {
 
 const mongoose = require('mongoose');
 // REQUEST CONNECTION TO DATABASE
+const uri = process.env.DATABASE_URI;
 mongoose.connect(
-    process.env.DATABASE_URI.toString(),
+    uri,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true
